@@ -10,6 +10,11 @@ public class UserModel {
     private String email;
     private String phone;
 
+    public UserModel(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
     public UserModel(String username, String password, String privilege, String status,
                      String fullname, String email, String phone) {
         this.username = username;
@@ -21,11 +26,31 @@ public class UserModel {
         this.phone = phone;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
     public String getPrivilege() {
         return privilege;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
     public String getFullname() {
         return fullname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
     }
 }
