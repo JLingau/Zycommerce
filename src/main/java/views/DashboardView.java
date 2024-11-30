@@ -1,30 +1,83 @@
 package views;
 
+import controllers.DashboardController;
+import models.ProductModel;
+
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DashboardView extends JPanel {
-    private ImageIcon productImage;
-    private JPanel itemGrid, quantityGrid;
-    private JLabel productName, productDescription, productPrice, imageLabel, quantityLabel;
-    private JButton addToCartButton, plusButton, minusButton;
-    private ImageIcon logoPicture;
-    private JSpinner quantitySpinner;
+    private List<ProductModel> productModel;
+    private List<ProductGrid> productGrid;
+    private DashboardController dashboardController;
 
     public DashboardView() {
+        dashboardController = new DashboardController();
+        productModel = dashboardController.getProductList();
+        productGrid = new ArrayList<ProductGrid>();
+
+        for (ProductModel product : productModel) {
+            productGrid.add(new ProductGrid(product));
+        }
+
+        for (ProductGrid product : productGrid) {
+            add(product);
+        }
+
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.add(new DashboardView());
+        frame.pack();
+
+        frame.setVisible(true);
+    }
+}
+
+class ProductGrid extends JPanel {
+    private JPanel quantityGrid;
+    private JLabel productName, productDescription, productPrice, imageLabel, quantityLabel, sellerLabel;
+    private JButton addToCartButton, plusButton, minusButton;
+    private ImageIcon logoPicture;
+    private ProductModel product;
+
+    public ProductGrid(ProductModel product) {
+        this.product = product;
+        initComponents();
+        initLayout();
+        plusButton.addActionListener(e -> incrementQuantity());
+        minusButton.addActionListener(e -> decrementQuantity());
+    }
+
+    public ProductGrid() {
+        initComponents();
+        initLayout();
+        plusButton.addActionListener(e -> incrementQuantity());
+        minusButton.addActionListener(e -> decrementQuantity());
+    }
+
+    public void initComponents() {
         Font heading = new Font("serif", Font.BOLD, 28);
         Font subHeading = new Font("serif", Font.BOLD, 20);
         // Inisialisasi seluruh komponen
-        logoPicture = new ImageIcon(getClass().getResource("/images/baju.jpeg"));
+        logoPicture = new ImageIcon(getClass().getResource("/images/" + product.getImage()));
         Image resizedImage = logoPicture.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
         imageLabel = new JLabel(new ImageIcon(resizedImage));
         imageLabel.setBorder(new LineBorder(Color.BLACK));
-        productName = new JLabel("Baju Kemerdekaan");
+        productName = new JLabel(product.getName());
         productName.setFont(subHeading);
-        productDescription = new JLabel("Baju Kemerdekaan Terbaru 2024 HUT RI");
-        productPrice = new JLabel("125000");
+        sellerLabel = new JLabel("Seller : " + product.getSeller());
+        productName.setFont(subHeading);
+        productDescription = new JLabel(product.getDescription());
+        productPrice = new JLabel(String.valueOf(product.getPrice()));
         productPrice.setForeground(new Color(66, 135, 245));
         productPrice.setFont(heading);
         quantityLabel = new JLabel("1");
@@ -40,66 +93,52 @@ public class DashboardView extends JPanel {
         quantityGrid.add(minusButton);
         quantityGrid.add(quantityLabel);
         quantityGrid.add(plusButton);
-        itemGrid = new JPanel();
-        itemGrid.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK, 2, true),
-                new EmptyBorder(10, 10, 10, 10)));
-        itemGrid.setLayout(new GridBagLayout());
-
-        // Button ActionListener
-        plusButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                incrementQuantity();
-            }
-        });
-
-        minusButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                decrementQuantity();
-            }
-        });
-
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        initTemplate();
     }
 
-    private void initTemplate() {
+    public void initLayout() {
+        setBorder(new CompoundBorder(new CompoundBorder(new EmptyBorder(10, 0, 10, 0),
+                new LineBorder(Color.BLACK, 2, true)),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        setLayout(new GridBagLayout());
+        setMaximumSize(new Dimension((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), 150));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridheight = 2;
+        gbc.gridheight = 3;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(0, 0, 0, 10);
-        itemGrid.add(imageLabel, gbc);
+        add(imageLabel, gbc);
 
         gbc.gridx++;
         gbc.gridheight = 1;
         gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        itemGrid.add(productName, gbc);
+        add(productName, gbc);
 
         gbc.gridy++;
-        itemGrid.add(productDescription, gbc);
+        add(productDescription, gbc);
+
+        gbc.gridy++;
+        add(sellerLabel, gbc);
 
         gbc.gridx++;
         gbc.gridy = 0;
         gbc.weightx = 0;
+        gbc.weighty = 0.5;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        itemGrid.add(productPrice, gbc);
+        add(productPrice, gbc);
 
         gbc.gridy++;
-        itemGrid.add(quantityGrid, gbc);
+        add(quantityGrid, gbc);
 
         gbc.gridx++;
         gbc.gridy = 0;
-        gbc.gridheight = 2;
+        gbc.gridheight = 3;
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(0, 0, 0, 0);
-        itemGrid.add(addToCartButton, gbc);
-
-        this.add(itemGrid);
+        add(addToCartButton, gbc);
     }
 
     private void incrementQuantity() {
@@ -120,18 +159,9 @@ public class DashboardView extends JPanel {
         updatePriceTimesQuantity(quantity);
     }
 
-    private void updatePriceTimesQuantity(int quantity) {
+    private void updatePriceTimesQuantity(double quantity) {
         // Update product price based on quantity
-        productPrice.setText(String.valueOf(quantity * Integer.parseInt(productPrice.getText())));
+        productPrice.setText(String.valueOf(quantity * product.getPrice()));
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.add(new DashboardView());
-        frame.pack();
-
-        frame.setVisible(true);
-    }
 }
