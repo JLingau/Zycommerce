@@ -2,6 +2,7 @@ package views;
 
 import controllers.AddItemController;
 import models.ProductModel;
+import models.UserModel;
 import utils.NumberInputField;
 
 import javax.imageio.ImageIO;
@@ -13,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 public class AddItem extends JFrame {
     private JLabel logoLabel, productNameLabel, productDescriptionLabel, productPriceLabel, productImageLabel, imageLabel;
@@ -23,10 +23,54 @@ public class AddItem extends JFrame {
     private File imageFile;
     private JFileChooser fileChooser;
     private JButton addImageButton, submitButton;
-    private final JPanel formPanel, containerPanel;
-    private AddItemController addItemController = new AddItemController();
+    private JPanel formPanel, containerPanel;
+    private AddItemController addItemController;
+    private UserModel userModel;
+    private ProductModel product;
 
-    public AddItem() {
+    public AddItem(UserModel userModel) {
+        this.userModel = userModel;
+        this.addItemController = new AddItemController(userModel);
+        initComponents();
+        initLayout();
+        addImageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                uploadImage();
+            }
+        });
+
+        submitButton.addActionListener(e -> {
+            addItemController.addProductToDB(new ProductModel(productNameTextField.getText(), userModel.getFullname(),
+                    productDescriptionTextArea.getText(), Integer.parseInt(productPriceField.getText()),
+                    imageFile.getName()), imageFile);
+            this.dispose();
+        });
+    }
+
+    public AddItem(UserModel userModel, ProductModel productModel) {
+        this.userModel = userModel;
+        this.product = productModel;
+        this.addItemController = new AddItemController(userModel);
+        initComponents();
+        initLayout();
+
+        addImageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                uploadImage();
+            }
+        });
+
+        submitButton.addActionListener(e -> {
+            addItemController.updateProduct(productModel, new ProductModel(productNameTextField.getText(), userModel.getFullname(),
+                    productDescriptionTextArea.getText(), Integer.parseInt(productPriceField.getText()), imageFile.getName()), imageFile);
+            JOptionPane.showMessageDialog(null, "Product Edited");
+            this.dispose();
+        });
+    }
+
+    private void initComponents() {
         ImageIcon image = new ImageIcon(getClass().getResource("/images/logo.png"));
         Image resizedImage = image.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
         Insets fieldInset = new Insets(5, 5, 5, 5);
@@ -59,24 +103,16 @@ public class AddItem extends JFrame {
         formPanel.setBackground(new Color(23, 183, 189));
         formPanel.setLayout(new GridBagLayout());
 
-        addImageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                uploadImage();
-            }
-        });
-
-        submitButton.addActionListener(e -> {
-            addItemController.addProductToDB(new ProductModel(productNameTextField.getText(), "admin",
-                    productDescriptionTextArea.getText(), Double.parseDouble(productPriceField.getText()),
-                    imageFile.getName()), imageFile);
-        });
-
-        initView();
+        if ((userModel != null && product != null) && (userModel.getPrivilege().equalsIgnoreCase("admin") ||
+                userModel.getPrivilege().equalsIgnoreCase("seller"))) {
+            productNameTextField.setText(product.getName());
+            productDescriptionTextArea.setText(product.getDescription());
+            productPriceField.setText(String.valueOf(product.getPrice()));
+            imageLabel.setIcon(new ImageIcon("/images/" + product.getImage()));
+        }
     }
 
-    private void initView() {
-        getContentPane().removeAll();
+    private void initLayout() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -125,8 +161,7 @@ public class AddItem extends JFrame {
         formPanel.add(submitButton, gbc);
 
         setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setBackground(new Color(23, 183, 189));
         getRootPane().setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         containerPanel.add(logoLabel);
@@ -155,7 +190,7 @@ public class AddItem extends JFrame {
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             imageFile = fileChooser.getSelectedFile();
             displayImage(imageFile);
-            initView();
+            initLayout();
         }
     }
 
@@ -168,9 +203,5 @@ public class AddItem extends JFrame {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(AddItem.this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    public static void main(String[] args) {
-        new AddItem();
     }
 }

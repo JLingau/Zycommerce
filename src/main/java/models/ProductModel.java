@@ -5,15 +5,19 @@ public class ProductModel {
     private String name;
     private String seller;
     private String description;
-    private double price;
+    private int price;
     private String image;
 
-    public ProductModel(String name, String seller, String description, double price, String image) {
+    public ProductModel(String name, String seller, String description, int price, String image) {
         this.name = name;
         this.seller = seller;
         this.description = description;
         this.price = price;
         this.image = image;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -24,7 +28,7 @@ public class ProductModel {
         return description;
     }
 
-    public double getPrice() {
+    public int getPrice() {
         return price;
     }
 
