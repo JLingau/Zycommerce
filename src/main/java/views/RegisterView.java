@@ -2,20 +2,24 @@ package views;
 
 import controllers.AuthController;
 import models.UserModel;
+import utils.NumberInputField;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.Enumeration;
 
 public class RegisterView extends JFrame {
     private final JPanel formPanel, containerPanel;
     private final JLabel usernameLabel, passwordLabel, fullnameLabel, emailLabel, phoneLabel, privilegeLabel, logoLabel;
     private final JRadioButton clientButton, sellerButton;
     private final JButton registerButton, loginButton;
-    private final JTextField usernameTextField, fullnameTextField, emailTextField, phoneTextField;
+    private final JTextField usernameTextField, fullnameTextField, emailTextField;
+    private final NumberInputField phoneNumberField;
     private final JPasswordField passwordTextField;
     private final ButtonGroup buttonGroup;
     private final ImageIcon logoPicture;
+    private String radioButtonValue, accountStatus;
     private AuthController authController;
 
     public RegisterView() {
@@ -45,25 +49,42 @@ public class RegisterView extends JFrame {
         fullnameTextField.setMargin(fieldInset);
         emailTextField = new JTextField(25);
         emailTextField.setMargin(fieldInset);
-        phoneTextField = new JTextField(25);
-        phoneTextField.setMargin(fieldInset);
+        phoneNumberField = new NumberInputField(25);
+        phoneNumberField.setMargin(fieldInset);
         passwordTextField = new JPasswordField(25);
         passwordTextField.setMargin(fieldInset);
         registerButton = new JButton("Register");
         loginButton = new JButton("Login");
         clientButton = new JRadioButton("Client");
+        clientButton.setActionCommand("client");
         clientButton.setBackground(new Color(34, 179, 181));
         sellerButton = new JRadioButton("Seller");
+        sellerButton.setActionCommand("seller");
         sellerButton.setBackground(new Color(34, 179, 181));
         buttonGroup = new ButtonGroup();
         buttonGroup.add(clientButton);
         buttonGroup.add(sellerButton);
         authController = new AuthController(this);
 
-        registerButton.addActionListener(e -> authController.validateAndInsertUser(new UserModel(
-                usernameTextField.getText().trim(), authController.getHashedPassword(String.valueOf(passwordTextField.getPassword()).trim()),
-                "client", "active", fullnameTextField.getText().trim(), emailTextField.getText().trim(),
-                phoneTextField.getText().trim())));
+        registerButton.addActionListener(e -> {
+            radioButtonValue = getSelectedRadioButton();
+            if (radioButtonValue == null) {
+                radioButtonValue = "client";
+            } else {
+                radioButtonValue = radioButtonValue.toLowerCase();
+            }
+
+            if (radioButtonValue.equalsIgnoreCase("client")) {
+                accountStatus = "active";
+            } else {
+                accountStatus = "pending";
+            }
+
+            authController.validateAndInsertUser(new UserModel(
+                    usernameTextField.getText().trim(), authController.getHashedPassword(String.valueOf(passwordTextField.getPassword()).trim()),
+                    radioButtonValue, accountStatus, fullnameTextField.getText().trim(), emailTextField.getText().trim(),
+                    phoneNumberField.getText().trim()));
+        });
 
         loginButton.addActionListener(e -> authController.moveToLogin());
 
@@ -136,7 +157,7 @@ public class RegisterView extends JFrame {
         c.gridwidth = 2;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = rightInset;
-        formPanel.add(phoneTextField, c);
+        formPanel.add(phoneNumberField, c);
 
         c.gridx = 0;
         c.gridy++;
@@ -173,7 +194,13 @@ public class RegisterView extends JFrame {
         this.pack();
     }
 
-    public static void main(String[] args) {
-        new RegisterView();
+    private String getSelectedRadioButton() {
+        for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements(); ) {
+            AbstractButton button = buttons.nextElement();
+            if (button.isSelected()) {
+                return button.getText();
+            }
+        }
+        return null;
     }
 }

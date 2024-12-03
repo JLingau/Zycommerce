@@ -1,9 +1,14 @@
 package views;
 
+import controllers.AuthController;
+import models.UserModel;
+
 import javax.swing.*;
 
-public class Layout extends JFrame {
+public class Layout {
+    private UserModel userModel;
+
     public Layout() {
-        super("Zycommerce");
+        new LoginView();
     }
 }

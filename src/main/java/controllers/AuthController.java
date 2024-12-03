@@ -50,7 +50,8 @@ public class AuthController {
         // Check form empty or not and validate other form requirements
         if (isNullOrEmpty(user.getUsername().trim()) || isNullOrEmpty(user.getPassword().trim())
                 || isNullOrEmpty(user.getEmail().trim()) || isNullOrEmpty(user.getPhone().trim())
-                || isNullOrEmpty(user.getFullname().trim()) || isNullOrEmpty(user.getPrivilege().trim())) {
+                || isNullOrEmpty(user.getFullname().trim()) || isNullOrEmpty(user.getPrivilege().trim())
+                || isNullOrEmpty(user.getStatus().trim())) {
             JOptionPane.showMessageDialog(null, "Please input all form fields");
         } else if (user.getPassword().length() < 6) {
             JOptionPane.showMessageDialog(null, "Password must be at least 6 characters");
@@ -63,12 +64,16 @@ public class AuthController {
 
     public void authenticateUser(UserModel user) {
         UserModel userContainer = userDAO.getUser(user);
-        if (user.getUsername().equals(userContainer.getUsername())
-                && user.getPassword().equals(userContainer.getPassword())) {
-            frame.dispose();
-            new HomeFrame(userContainer, new CartController());
+        if ((user.getUsername().equals(userContainer.getUsername())
+                && user.getPassword().equals(userContainer.getPassword()))) {
+            if (userContainer.getStatus().equalsIgnoreCase("active")) {
+                frame.dispose();
+                new HomeFrame(userContainer, new CartController());
+            } else {
+                JOptionPane.showMessageDialog(frame, "Wait for your account confirmation !");
+            }
         } else {
-            JOptionPane.showMessageDialog(frame, "Invalid username or password");
+            JOptionPane.showMessageDialog(frame, "Invalid username or password !");
         }
     }
 
