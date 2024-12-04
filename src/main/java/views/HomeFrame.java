@@ -37,6 +37,18 @@ public class HomeFrame extends JFrame{
         adminScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         adminScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
+        JMenuBar menuBar = new JMenuBar();
+        JMenu systemMenu = new JMenu("System");
+        JMenuItem logoutMenuItem = new JMenuItem("Logout");
+
+        systemMenu.add(logoutMenuItem);
+        menuBar.add(systemMenu);
+
+        logoutMenuItem.addActionListener(e -> {
+            this.dispose();
+            new Layout();
+        });
+
         JTabbedPane tabbedPane = new JTabbedPane();
         if (userModel.getPrivilege().equalsIgnoreCase("client")) {
             tabbedPane.add("Dashboard", scrollPane);
@@ -77,6 +89,7 @@ public class HomeFrame extends JFrame{
         }
 
         add(tabbedPane);
+        setJMenuBar(menuBar);
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
