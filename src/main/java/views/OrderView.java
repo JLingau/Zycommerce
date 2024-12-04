@@ -97,7 +97,7 @@ class OrderGrid extends JPanel {
         productName.setFont(heading);
         productDescription = new JLabel(transactionModel.getProductDescription());
         productDescription.setFont(subHeading);
-        if (userModel.getPrivilege().equals("admin")) {
+        if (userModel.getPrivilege().equals("admin") || userModel.getPrivilege().equalsIgnoreCase("seller")) {
             productActor = new JLabel("Buyer : " + transactionModel.getProductBuyer());
         } else {
             productActor = new JLabel("Seller : " + transactionModel.getProductSeller());
